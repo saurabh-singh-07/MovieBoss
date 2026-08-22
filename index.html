@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MovieBoss</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css">
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <span>Movie</span>Boss
+        </div>
+        <div class="search-container">
+            <div class="search-box">
+                <input type="text" placeholder="Search movies..." class="input-box" id="searchInput">
+            </div>
+            <button class="search-btn" id="searchBtn">Search</button>
+            <div class="filters">
+                <select id="genereFilter">
+                    <option value="">All Geners</option>
+                </select>
+                <select id="yearFilter">
+                    <option value="">All years</option>
+                </select>
+                <select id="sortFilter">
+                    <option value="">Sort By</option>
+                    <option value="">Most Popular</option>
+                    <option value="">Hightest Rated</option>
+                    <option value="">Latest Release</option>
+                    <option value="">A-Z</option>
+                </select>
+            </div>
+            <button class="clear-btn" id="clearBtn">Clear All</button>
+        </div>
+    </div>
+<!-- main container -->
+    <div class="main-container">
+        <div class="search-results" id="searchResults">
+            <h2 class="section-title">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            Search Results
+            </h2>
+            <div class="search-movie-list">
+                <div class="left-right arrow-hidden" id="searchLeft"><i class="fa-solid fa-less-than"></i></div>
+                <div class="search-movie" id="searchMovie">
+                </div>
+                <div class="left-right" id="searchRight"><i class="fa-solid fa-greater-than"></i></div>
+            </div>
+        </div>
+
+        <div id="trendingSection">
+            <h2 class="section-title"><i class="fa-solid fa-fire"></i>Trending Now</h2>
+            <div class="trending-movie-list">
+                <div class="left-right arrow-hidden" id="left"><i class="fa-solid fa-less-than"></i></div>
+                <div class="trending-movie" id="trendingMovie">
+                </div>
+                <div class="left-right" id="right"><i class="fa-solid fa-greater-than"></i></div>
+            </div>
+        </div>
+        
+        <div class="random-movies" id="randomMovies">
+            <h2 class="section-title"><i class="fa-solid fa-clapperboard"></i>Latest Movies</h2>
+            <div class="latest-movie-list">
+                 <div class="left-right arrow-hidden" id="latestLeft"><i class="fa-solid fa-less-than"></i></div>
+                <div class="movies-grid" id="moviesGrid">
+                </div>
+                <div class="left-right" id="latestRight"><i class="fa-solid fa-greater-than"></i></div>
+            </div>
+        </div>
+
+    <script src="config.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

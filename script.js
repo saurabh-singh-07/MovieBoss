@@ -1,0 +1,293 @@
+const leftClick = document.getElementById("left");
+const rightClick = document.getElementById("right");
+const trendingMovie = document.getElementById("trendingMovie");
+const movieGrid = document.getElementById("moviesGrid");
+
+let scrollAmount = 0;
+
+function displayMovies(movies,container){
+    container.innerHTML = "";
+    movies.forEach(movie => {
+        const card = document.createElement("div");
+        card.classList.add("movie-card");
+        const imageContainer = document.createElement("div");
+        imageContainer.classList.add("image-container")
+        const image = document.createElement("img");
+        image.src = movie.poster;
+        image.alt = movie.title;
+        imageContainer.append(image);
+        const title = document.createElement("h2")
+        const rating = document.createElement("p");
+        title.textContent = movie.title;
+        rating.textContent = `⭐ ${movie.user_rating}`;
+        card.append(imageContainer,title,rating)
+        container.append(card)
+    });
+
+const movieCard = document.querySelector(".movie-card");
+const cardWidth = movieCard.offsetWidth;
+const gap = parseInt(getComputedStyle(trendingMovie).gap);
+scrollAmount = cardWidth + gap;
+}
+
+leftClick.addEventListener('click', () =>{
+    updateArrows(trendingMovie,leftClick,rightClick)
+    trendingMovie.scrollBy({
+        left: -scrollAmount,
+        behavior: "smooth"
+    });
+});
+
+rightClick.addEventListener('click', () =>{
+    updateArrows(trendingMovie,leftClick,rightClick)
+    trendingMovie.scrollBy({
+        left: scrollAmount,
+        behavior: "smooth"
+    });
+});
+
+trendingMovie.addEventListener("scroll", () => {
+    updateArrows(trendingMovie, leftClick, rightClick);
+});
+
+function updateArrows(container,leftArrow,rightArrow) {
+
+    if (container.scrollLeft <= 1) {
+        leftArrow.classList.add("arrow-hidden");
+    } else {
+        leftArrow.classList.remove("arrow-hidden");
+    }
+
+    if (
+        container.scrollLeft + container.clientWidth >=
+        container.scrollWidth - 1
+    ) {
+        rightArrow.classList.add("arrow-hidden");
+    } else {
+        rightArrow.classList.remove("arrow-hidden");
+    }
+}
+
+fetch(`https://api.watchmode.com/v1/list-titles/?apiKey=${API_KEY}&types=movie`);
+
+const url = `https://api.watchmode.com/v1/list-titles/?apiKey=${API_KEY}&types=movie`;
+
+const trendingMovieCatch = localStorage.getItem("trendingMovie");
+const CACHE_TIME = 30 * 24 * 60 * 60 * 1000;
+
+// trending movie ka section
+
+if(trendingMovieCatch){
+    const data = JSON.parse(trendingMovieCatch);
+    const currentTime = Date.now();
+    if(currentTime - data.time < CACHE_TIME){
+        console.log("trending se cahche data aa raha hai");
+        displayMovies(data.movies,trendingMovie);
+    }
+   
+} else{
+fetch(url)
+    .then(response => {
+        if(!response.ok){
+            throw new Error(`Error html: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(async data => {
+        const movies = data.titles.slice(0,10);
+
+        const movieDetails = await Promise.all(
+            movies.map(movie => {
+
+                const detailUrl = `https://api.watchmode.com/v1/title/${movie.id}/details/?apiKey=${API_KEY}`;
+                return fetch(detailUrl).then(response => response.json());
+            })
+        );
+
+        const cacheData = {
+            movies: movieDetails,
+            time: Date.now()
+        };
+        localStorage.setItem(
+            "trendingMovie",JSON.stringify(cacheData)
+        );
+
+        displayMovies(cacheData.movies,trendingMovie);
+
+    }).catch(error => {
+        console.log("Trending movies error:",error);
+    });
+
+}
+// latest movies ka section 
+const latestMovieCatch = localStorage.getItem("latestMovie");
+
+if(latestMovieCatch){
+    const data = JSON.parse(latestMovieCatch);
+
+    const currentTime = Date.now();
+
+    if(currentTime - data.time < CACHE_TIME){
+        console.log("latest se catch aa raha hai...");
+        displayMovies(data.movies,movieGrid);
+    }
+}else{
+
+const latestUrl =
+    `https://api.watchmode.com/v1/list-titles/?apiKey=${API_KEY}&types=movie&release_date_start=20260101&release_date_end=20260822&sort_by=release_date_desc`;
+
+    fetch(latestUrl).then(response => {
+        if(!response.ok){
+            throw new Error(`Error html: ${response.status}`);    
+        }
+        return response.json();
+    })
+    .then(async data => {
+        
+        const latestMovies = data.titles.slice(10,20);
+
+        const latestMoviesDetails = await Promise.all(
+            latestMovies.map(movie => {
+                const latestUrlDetail = 
+                    `https://api.watchmode.com/v1/title/${movie.id}/details/?apiKey=${API_KEY}`;
+                return fetch(latestUrlDetail).then(response => response.json());
+            })
+        );
+
+        const cacheData = {
+            movies: latestMoviesDetails,
+            time: Date.now()
+        }
+        localStorage.setItem(
+            "movieGrid",JSON.stringify(cacheData)
+
+        );
+            displayMovies(cacheData.movies,movieGrid);
+
+    }).catch(error => {
+        console.log(`Latest movies error:`, error);
+    });
+
+}
+
+// search movie ka section
+const searchBtn = document.getElementById("searchBtn");
+const searchInput = document.getElementById("searchInput");
+const searchMovie = document.getElementById("searchMovie");
+const searchResults = document.getElementById("searchResults");
+
+async function searchMovies() {
+    const searchValue = searchInput.value.trim();
+    if(searchValue === '') return;
+
+    const cacheKey = `search_${searchValue.toLowerCase()}`;
+    const cachedSearch = localStorage.getItem(cacheKey);
+
+    if(cachedSearch){
+        const cacheData = JSON.parse(cachedSearch);
+        const currentTime = Date.now();
+        if(currentTime - cacheData.time < CACHE_TIME){
+        console.log("Search cache se data aa raha hai");
+
+        searchMovie.innerHTML = "";
+        searchResults.style.display = "block";
+
+        displayMovies(cacheData.movies, searchMovie);
+
+        searchInput.value = "";
+            return;
+        }  
+    }
+        console.log("Search API se data aa raha hai");
+
+
+    const searchUrl =
+    `https://api.watchmode.com/v1/search/?apiKey=${API_KEY}&search_field=name&search_value=${encodeURIComponent(searchValue)}&types=movie`;
+
+    try{
+        const response = await fetch(searchUrl);
+        if(!response.ok){
+            throw new Error(`Error: ${response.status}`);
+        }
+        const data = await response.json();
+
+        const results = data.title_results.slice(0,10);
+        const searchMovieDetails = await Promise.all(
+            results.map(movie => {
+                const detailSearchUrl = 
+                `https://api.watchmode.com/v1/title/${movie.id}/details/?apiKey=${API_KEY}`;
+                return fetch(detailSearchUrl).then(response => response.json());
+            })
+        );
+        const cacheData = {
+            movies: searchMovieDetails,
+            time: Date.now()
+        };
+
+        localStorage.setItem(
+        cacheKey,
+        JSON.stringify(cacheData)
+        );
+        searchMovie.innerHTML = "";
+        searchResults.style.display = 'block';
+        displayMovies(searchMovieDetails, searchMovie);
+        searchInput.value = "";
+    }
+    catch(error){
+        console.log("Search error:",error);
+    }
+
+}
+
+searchBtn.addEventListener("click", searchMovies);
+
+searchInput.addEventListener("keydown", (event) => {
+
+    if (event.key === "Enter") {
+        searchMovies();
+    }
+
+});
+
+
+// search arrow key
+const searchLeftClick = document.getElementById("searchLeft");
+const searchRightClick = document.getElementById("searchRight");
+
+searchLeftClick.addEventListener('click',() => {
+    searchMovie.scrollBy({
+        left: -scrollAmount,
+        behavior: "smooth"
+     });
+});
+searchRightClick.addEventListener('click',() => {
+    searchMovie.scrollBy({
+        left: scrollAmount,
+        behavior: "smooth"
+     });
+});
+
+searchMovie.addEventListener("scroll", () => {
+    updateArrows(searchMovie, searchLeftClick, searchRightClick);
+});
+
+// latest arrow key
+const latestLeftClick = document.getElementById("latestLeft");
+const latestRightClick = document.getElementById("latestRight");
+
+latestLeftClick.addEventListener('click',() => {
+    movieGrid.scrollBy({
+        left: -scrollAmount,
+        behavior: "smooth"
+     });
+});
+latestRightClick.addEventListener('click',() => {
+    movieGrid.scrollBy({
+        left: scrollAmount,
+        behavior: "smooth"
+     });
+});
+
+movieGrid.addEventListener("scroll", () => {
+    updateArrows(movieGrid, latestLeftClick, latestRightClick);
+});
