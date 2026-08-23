@@ -18,10 +18,17 @@ function displayMovies(movies,container){
         imageContainer.append(image);
         const title = document.createElement("h2")
         const rating = document.createElement("p");
-        title.textContent = movie.title;
+        const getMoreDetailsBtn = document.createElement("button");
+        getMoreDetailsBtn.classList.add("get-details");
+        getMoreDetailsBtn.innerHTML = "Get More Details";
+        title.textContent = movie.genre_names;
         rating.textContent = `⭐ ${movie.user_rating}`;
-        card.append(imageContainer,title,rating)
+        card.append(imageContainer,title,rating,getMoreDetailsBtn)
         container.append(card)
+
+        getMoreDetailsBtn.addEventListener("click", () => {
+            showMovieDetails(movie)
+        });
     });
 
 const movieCard = document.querySelector(".movie-card");
@@ -73,7 +80,7 @@ fetch(`https://api.watchmode.com/v1/list-titles/?apiKey=${API_KEY}&types=movie`)
 const url = `https://api.watchmode.com/v1/list-titles/?apiKey=${API_KEY}&types=movie`;
 
 const trendingMovieCatch = localStorage.getItem("trendingMovie");
-const CACHE_TIME = 30 * 24 * 60 * 60 * 1000;
+const CACHE_TIME = 30 * 24 * 60 *60 * 1000;
 
 // trending movie ka section
 
@@ -81,7 +88,6 @@ if(trendingMovieCatch){
     const data = JSON.parse(trendingMovieCatch);
     const currentTime = Date.now();
     if(currentTime - data.time < CACHE_TIME){
-        console.log("trending se cahche data aa raha hai");
         displayMovies(data.movies,trendingMovie);
     }
    
@@ -291,3 +297,76 @@ latestRightClick.addEventListener('click',() => {
 movieGrid.addEventListener("scroll", () => {
     updateArrows(movieGrid, latestLeftClick, latestRightClick);
 });
+
+// show one movie in details 
+const movieDetailContainer = document.querySelector(".movie-detail-container")
+const movieDetailOverlay = document.getElementById("movieDetailOverlay");
+const movieDetailContent = document.getElementById("movieDetailContent");
+const closeDetail = document.getElementById("closeDetail");
+
+function showMovieDetails(movie){
+    movieDetailContent.innerHTML = "";
+
+    const details = document.createElement("div");
+    details.className = "details";
+    const image = document.createElement("div");
+    image.className = "image";
+    const poster = document.createElement("img");
+    poster.src = movie.poster;
+    poster.alt = "Image title";
+    image.appendChild(poster);
+    
+    const description = document.createElement("div");
+    description.className = "description";
+    const name = document.createElement("h3");
+
+    name.textContent = movie.title;
+    const releaseDate = document.createElement("p");
+    releaseDate.textContent = `Release Date :-  ${movie.release_date} `;
+    const userRating = document.createElement("p");
+    userRating.textContent = `Movie rating :-  ⭐ ${movie.user_rating}`;
+    const runtime = document.createElement("p");
+    runtime.textContent = `Duration :-  ${movie.runtime_minutes} Minutes`;
+    const typeOfAudience = document.createElement("p");
+    typeOfAudience.innerText = `Audience :-  ${movie.will_you_like_this}`;
+    const location = document.createElement("div");
+    location.className = "location";
+
+    const trailer = document.createElement("div");
+    trailer.className = "movie-link";
+
+    const trailerLink = document.createElement("a");
+    if (movie.trailer) {
+
+        trailerLink.textContent = "Trailer";
+        trailerLink.href = movie.trailer;
+        trailerLink.target = "_blank";
+    } else {
+        trailerLink.textContent = "Trailer not available";
+    }
+
+trailer.append(trailerLink);
+    const streaming = document.createElement("div");
+    streaming.className = "movie-link";
+    const streamingLink = document.createElement("a");
+    if (movie.network_names?.length > 0) {
+        streamingLink.textContent = movie.network_names.join(", ");
+    } else {
+        streamingLink.textContent = "Streaming info not available";
+    }
+    streaming.append(streamingLink);
+    location.append(trailer,streaming);
+
+    description.append(
+        name,releaseDate,userRating,runtime,typeOfAudience,location
+    );
+
+    details.append(image,description);
+    movieDetailContent.appendChild(details);
+    movieDetailOverlay.style.display = "flex";   
+}
+
+closeDetail.addEventListener('click', () => {
+    movieDetailOverlay.style.display = "none";   
+})
+

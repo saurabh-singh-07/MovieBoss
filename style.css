@@ -57,15 +57,6 @@ body{
     box-shadow: 2px 5px 10px rgba(0, 0, 0, 0.403);
     border: 2px solid rgba(243, 74, 12, 0.989);
 }
-.search-btn{
-    padding: 10px 25px;
-    color: white;
-    cursor: pointer;
-    background: rgba(243, 74, 12, 0.733);
-    border: 2px solid rgba(0, 0, 0, 0.403);
-    border-radius: 20px;
-    outline: none;
-}
 .filters{
     display: flex;
     flex-wrap: wrap;
@@ -88,6 +79,9 @@ body{
     border: 2px solid rgba(243, 74, 12, 0.989);
 }
 .clear-btn{
+    display: none;
+}
+.clear-btn, .search-btn, .get-details{
     padding: 12px 22px;
     border: none;
     outline: none;
@@ -97,9 +91,8 @@ body{
     background: rgba(0, 0, 0, 0.301);
     color: white;
     transition: all 0.3s ease-in-out;
-    display: none;
 }
-.clear-btn:hover{
+.clear-btn:hover, .search-btn:hover, .get-details:hover{
     box-shadow: 2px 5px 10px rgba(0, 0, 0, 0.403);
     background: rgba(243, 74, 12, 0.989);
 }
@@ -183,4 +176,142 @@ body{
 }
 .search-results {
     display: none;
+}
+/* more details */
+.get-details{
+    margin: 10px 0;
+}
+.movie-detail-overlay{
+    position: fixed;
+    inset: 0;
+
+    display: none;
+    /* display: flex; */
+    justify-content: center;
+    align-items: center;
+
+    padding: 30px;
+    background: rgba(0, 0, 0, 0.301);
+    backdrop-filter: blur(8px);
+
+    z-index: 1000;
+}
+.movie-detail-container{
+    position: relative;
+
+    width: min(900px, 90vw);
+    max-height: 85vh;
+    padding: 30px;
+
+    background: rgba(0, 0, 0, 0.301);
+    color: white;
+    border-radius: 20px;
+    overflow-y: auto;
+}
+.movie-detail-container > h2 {
+    margin: 0 0 25px;
+    font-size: 28px;
+}
+
+.details {
+    display: flex;
+    gap: 35px;
+    justify-content: center;
+    align-items: flex-start;
+}
+.details .image {
+    flex: 0 0 280px;
+}
+
+.details .image img {
+    width: 100%;
+    height: 400px;
+
+    object-fit: cover;
+    border-radius: 12px;
+}
+.description {
+    flex: 1;
+}
+
+.description h3 {
+    margin-top: 0;
+    font-size: 2rem;
+}
+
+.description p {
+    margin: 12px 0;
+}
+.location{
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    min-height: 100px;
+    margin-top: 25px;
+}
+.movie-link{
+    padding: 10px 20px;
+    border-radius: 15px;
+    background: rgba(0, 0, 0, 0.403);
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+}
+.movie-link:hover{
+    box-shadow: 2px 5px 10px rgba(0, 0, 0, 0.403);
+    background: rgba(243, 74, 12, 0.989);
+}
+.movie-link a{
+    display: inline-block;
+    color: rgba(255, 255, 255, 0.826);
+    text-decoration: none;
+    font-size: 18px;
+    padding: 10px;
+}
+.close-detail {
+    position: absolute;
+    top: 18px;
+    right: 20px;
+
+    width: 40px;
+    height: 40px;
+
+    border: none;
+    border-radius: 50%;
+
+    background: transparent;
+    color: white;
+
+    font-size: 25px;
+    cursor: pointer;
+}
+@media (max-width: 700px) {
+
+    .movie-detail-overlay {
+        padding: 15px;
+    }
+
+    .movie-detail-container {
+        width: 100%;
+        padding: 20px;
+    }
+
+    .details {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .details .image {
+        width: 220px;
+        flex: none;
+    }
+
+    .details .image img {
+        height: 320px;
+    }
+
+    .description {
+        width: 100%;
+        text-align: center;
+    }
+
 }
