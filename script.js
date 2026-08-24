@@ -304,7 +304,48 @@ const movieDetailOverlay = document.getElementById("movieDetailOverlay");
 const movieDetailContent = document.getElementById("movieDetailContent");
 const closeDetail = document.getElementById("closeDetail");
 
+// show movie details function
 function showMovieDetails(movie){
+
+const cachedKey = `movieDetails_${movie.id}`;
+const cachedDetails = localStorage.getItem(cachedKey);
+
+// catchdata show
+if(cachedDetails){
+    const catchData = JSON.parse(cachedDetails);
+
+    if(Date.now() - catchData.time < CACHE_TIME){
+        displayMovieDetails(catchData.movie);
+
+    }
+
+}else{
+    const detailUrl =
+    `https://api.watchmode.com/v1/title/${movie.id}/details/?apiKey=${API_KEY}`;
+
+    fetch(detailUrl)
+    .then(response => {
+        if(!response.ok){
+            throw new Error(`Error: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        const catchData = {
+            movie: data,
+            time: Date.now()
+        };
+        localStorage.setItem(
+            cachedKey,JSON.stringify(catchData)
+        );
+        displayMovieDetails(data);
+    })
+    .catch(error =>{
+        console.log(`error: `,error)
+    });
+};
+};
+function displayMovieDetails(movie){
     movieDetailContent.innerHTML = "";
 
     const details = document.createElement("div");
@@ -363,9 +404,8 @@ trailer.append(trailerLink);
 
     details.append(image,description);
     movieDetailContent.appendChild(details);
-    movieDetailOverlay.style.display = "flex";   
-}
-
+    movieDetailOverlay.style.display = "flex";  
+};
 closeDetail.addEventListener('click', () => {
     movieDetailOverlay.style.display = "none";   
 })
